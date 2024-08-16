@@ -8,4 +8,5 @@ public class UrlMapping {
     public static final String REGISTER_USER ="/register" ;
     public static final String GET_USER_By_ID = "/user/{userId}";
     public static final String DELETE_USER_BY_ID = "/delete/{userId}";
+    public static final String GET_ALL_USER = "/all-users";
 }
