@@ -1,4 +1,5 @@
 package com.Universal_pet_care.controller;
+
 import com.Universal_pet_care.Dto.EntityConverter;
 import com.Universal_pet_care.Dto.UserDto;
 import com.Universal_pet_care.exception.ResourceNotFoundException;
@@ -15,8 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 @RequiredArgsConstructor
 @RequestMapping(UrlMapping.USERS)
@@ -35,25 +35,53 @@ public class UserController {
             return ResponseEntity.ok(new ApiResponse(FeedBackMessage.SUCCESS, registeredUser));
         } catch (UserAlreadyExistsException e) {
             return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
-        }
-        catch (Exception e){
-            return  ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(),null));
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
     @PostMapping(UrlMapping.UPDATE_USER)
-    public ResponseEntity<ApiResponse> update(@PathVariable  Long userId,@RequestBody UserUpdateRequest request){
-        try{
+    public ResponseEntity<ApiResponse> update(@PathVariable Long userId, @RequestBody UserUpdateRequest request) {
+        try {
             User user = userService.updateUser(userId, request);
             //convert it into userdto to mask important data which return once it is successfull
-            UserDto updateUser=entityConverter.mapEntityToDto(user,UserDto.class);
-    return ResponseEntity.ok(new ApiResponse(FeedBackMessage.UPDATE_SUCCESS,updateUser));
-        }
-        catch (ResourceNotFoundException e){
+            UserDto updateUser = entityConverter.mapEntityToDto(user, UserDto.class);
+            return ResponseEntity.ok(new ApiResponse(FeedBackMessage.UPDATE_SUCCESS, updateUser));
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
-        }
-        catch (Exception e){
-            return  ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(),null));
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(), null));
         }
     }
+
+
+    @GetMapping(UrlMapping.GET_USER_By_ID)
+    public ResponseEntity<ApiResponse> delete(@PathVariable Long userId) {
+        try {
+            User user = userService.findById(userId);
+            UserDto theUser = entityConverter.mapEntityToDto(user, UserDto.class);
+            return ResponseEntity.ok(new ApiResponse(FeedBackMessage.FOUND, theUser));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+
+    @DeleteMapping(UrlMapping.DELETE_USER_BY_ID)
+    public ResponseEntity<ApiResponse> deleteById(@PathVariable Long userId) {
+        try {
+            userService.delete(userId);
+            return ResponseEntity.ok(new ApiResponse(FeedBackMessage.DELETE_SUCCESS, null));
+
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+
 }
